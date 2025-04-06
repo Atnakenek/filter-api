@@ -54,17 +54,46 @@ public class FilterApi {
         asset.put("color", "blue");
         System.out.println("Color = blue. Filter should match: " + filter.matches(asset));
         // Reading filter from input
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("Insert your custom filter: ");
-        String input = scanner.nextLine();
-        try {
-            Filter parsedFilter = FilterDeserializer.parse(input);
-            System.out.println("Parsed as: " + parsedFilter);
-            System.out.println("Asset is: " + asset);
-            System.out.println("Matches? " + parsedFilter.matches(asset));
-        } catch (Exception e) {
-            System.out.println("Failed to parse filter: " + e.getMessage());
-        }
+        readFromInput(asset);
+    }
 
+    private static void readFromInput(Map<String, String> asset) {
+        Scanner scanner = new Scanner(System.in);
+        while (true) {
+            System.out.print("Do you want to modify the asset? (Y/N): ");
+            String mod = scanner.nextLine().trim();
+            if (mod.equalsIgnoreCase("Y")) {
+                System.out.println("Enter key=value pairs (type anything without \"=\" to finish):");
+                while (true) {
+                    System.out.print(" > ");
+                    String line = scanner.nextLine().trim();
+                    if (!line.contains("=")) {
+                        break;
+                    }
+                    String[] parts = line.split("=", 2);
+                    String key = parts[0].trim();
+                    String value = parts[1].trim();
+                    asset.put(key, value);
+                }
+                System.out.println("Updated asset: " + asset);
+            }
+            System.out.println("Enter filter expression:");
+            String input = scanner.nextLine();
+            try {
+                Filter filter = FilterDeserializer.parse(input);
+                System.out.println("Asset is: " + asset);
+                System.out.println("Filter is: " + filter);
+                System.out.println("Matches? " + filter.matches(asset));
+            } catch (Exception e) {
+                System.out.println("Invalid filter: " + e.getMessage());
+            }
+            System.out.print("Try again? (Y/N): ");
+            String answer = scanner.nextLine().trim();
+            if (answer.equalsIgnoreCase("N")) {
+                System.out.println("Exiting...");
+                break;
+            }
+        }
+        scanner.close();
     }
 }
